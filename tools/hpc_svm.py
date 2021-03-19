@@ -1,5 +1,8 @@
 ''' Computes probabilities for HPC model '''
 
+# downloading model for transfer learning
+from keras.applications.vgg19 import VGG19
+from keras.applications.vgg19 import preprocess_input
 from sklearn.svm import *
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import StratifiedShuffleSplit
@@ -9,6 +12,25 @@ import pandas as pd
 import numpy as np
 
 import argparse
+
+
+#################################
+import keras
+from keras import backend as K
+from keras.callbacks import Callback, EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
+from keras.preprocessing.image import ImageDataGenerator
+from keras.utils.np_utils import to_categorical
+from keras.models import Sequential, model_from_json
+from keras.optimizers import SGD, RMSprop, Adam, Adagrad, Adadelta
+from keras.applications import VGG16
+from keras.layers import Dense, Dropout, Activation, Flatten, BatchNormalization, Conv2D, MaxPool2D, MaxPooling2D
+from sklearn.metrics import auc, roc_curve
+from sklearn.metrics import confusion_matrix
+# from sklearn.externals import joblib
+from sklearn.metrics import classification_report
+from keras.models import Model
+
+#####################################
 # ----------------
 META_AVG = 'avg'
 META_STD = 'std'
@@ -82,11 +104,56 @@ meta = pd.read_pickle(META_FILE)
 
 feats = meta.index
 
-# data_train = data_train[:10]
 
 train_x, train_y = prep(data_train)
 val_x, val_y = prep(data_val)
 test_x, test_y = prep(data_test)
+
+# print("\n##########Feature extraction#################\n\n")
+# Layer_Feature = 'block4_conv4'
+# model_vgg19 = VGG19(include_top=True, weights=None)
+# optimizer = Adam(lr=0.0001)
+
+# arg_model = Model(inputs=model_vgg19.input,
+#                 outputs=model_vgg19.get_layer(Layer_Feature).output)
+
+# arg_model.compile(loss='categorical_crossentropy',
+#                 metrics=['accuracy'])
+# optimizer = optimizer,
+# bottleneck_train1 = arg_model.predict(
+#     preprocess_input(train_x), batch_size=5, verbose=1)
+# print("\n----bottleneck-------\n")
+# print(bottleneck_train1)
+
+# print("###########################################################################\n\n")
+# print(val_y, test_y)
+
+
+
+# directory1 = "/home/nav/Downloads/data-rw"
+# X_test_features = np.load(directory1+'/X_test_features_b4C4-003.npy')
+# X_train_features = np.load(directory1+'/X_train_features_b4C4-005.npy')
+
+# y_test_1dim=np.load(directory1+'/Y_test_1dim.npy')
+# y_train_1dim=np.load(directory1+'/Y_train_1dim.npy')
+
+
+
+
+# print(y_test_1dim.shape)
+# print(y_train_1dim.shape)
+# print(X_test_features.shape)
+# print(X_train_features.shape)
+
+
+
+
+
+print('*'*40)
+
+# print('train_x : ',train_x.shape,'\t', '',train_y.shape, val_x.shape,
+#     val_y.shape, test_x.shape, test_y.shape)
+
 
 if args.svmgamma is not None and args.svmc is not None:
     model = SVC(C=args.svmc, gamma=args.svmgamma, cache_size=4096)
@@ -112,15 +179,14 @@ val_p = model.predict(val_x)
 test_p = model.predict(test_x)
 
 # --Checking accuracy with Confusion matrix-----------------------
-print("\n\n ------generating Confusion matrix-------------\n")
-print(train_x.shape(), train_y.shape(), val_x.shape(),
-      val_y.shape(), test_x.shape(), test_y.shape())
-cm_x = metrics.confusion_matrix(val_x, test_p)
+print("\n\n ------Generating Confusion matrix-------------\n")
+
+cm_x = metrics.confusion_matrix(test_y, test_p)
 print(cm_x)
-print("Accuracy = ", metrics.accuracy_score(val_x, test_p)*100)
+print("Accuracy = ", metrics.accuracy_score(test_p, test_y)*100)
 print("\n------------***********----------------------\n\n")
 # -------------------------------------------------------------------
 
 data_p = pd.DataFrame(data=[train_p, val_p, test_p], index=[
-                      'train', 'validation', 'test']).transpose()
+    'train', 'validation', 'test']).transpose()
 data_p.to_pickle(HPC_FILE)

@@ -1,1 +1,1 @@
-{"epoch": 0, "lr": 0.0005, "avg_r": {"trn_avg": [], "trn_run": [], "val_avg": [], "val_run": [], "trn_best": -999.0, "val_best": -999.0, "val_fails": 0}}
+{"epoch": 100, "lr": 0.0005, "avg_r": {"trn_avg": [-0.7571428571428571], "trn_run": [], "val_avg": [-0.7333332697550455], "val_run": [], "trn_best": -0.7571428571428571, "val_best": -0.7333332697550455, "val_fails": 0}}
